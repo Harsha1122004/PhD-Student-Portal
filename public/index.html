@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhD Portal - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="background-animation">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <h1 class="title">PhD <span> Portal</span></h1>
+
+    <div class="container">
+        <div class="left">
+            <img src="50b2da87596057.5dbcc7264b362.gif" alt="Illustration" class="illustration">
+            <p class="left-text">Empowering your academic journey with seamless access to resources.</p>
+        </div>
+        <div class="right">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="regNo" placeholder="Registration Number" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <select id="role">
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                </select>
+                <button type="submit">Login</button>
+            </form>
+            <p id="errorMessage"></p>
+           
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const regNo = document.getElementById("regNo").value.trim();
+            const password = document.getElementById("password").value;
+            const role = document.getElementById("role").value;
+            const errorMessage = document.getElementById("errorMessage");
+
+            try {
+                const response = await fetch("http://localhost:5000/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ regNo, password, role })
+                });
+
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    alert("Login successful!");
+                    localStorage.setItem("user", JSON.stringify(result.user));
+                    localStorage.setItem("authToken", result.token);
+
+                    if (role === "student") {
+                        window.location.href = "student-dashboard.html";
+                    } else {
+                        window.location.href = "teacher-dashboard.html";
+                    }
+                } else {
+                    errorMessage.textContent = "Login failed: " + (result.message || "Invalid credentials");
+                    errorMessage.style.display = "block";
+                    errorMessage.classList.add("shake");
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                errorMessage.textContent = "Server error. Please try again later.";
+                errorMessage.style.display = "block";
+                errorMessage.classList.add("shake");
+            }
+        });
+    </script>
+</body>
+</html>

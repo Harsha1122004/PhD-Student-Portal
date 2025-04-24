@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="teacher.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="light-theme">
+    <!-- Background Animation -->
+    <div class="background-animation">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="Vignan-logo.png" alt="Logo" class="logo-img">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> Students</a></li>
+                    <li><a href="#"><i class="fas fa-book"></i> Courses</a></li>
+                    <li><a href="#" id="settingsBtn"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <h1>Welcome back, <span id="teacherNameHeader">Teacher</span></h1>
+                <div class="user-profile">
+                    <img id="profilePic" src="profile-pic.png" alt="Profile Picture">
+                    <span id="teacherName">Teacher Name</span>
+                </div>
+            </header>
+
+            <div class="dashboard-container">
+                <!-- Profile Section -->
+                <div class="profile-section">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <img id="profilePicLarge" src="profile-pic.png" alt="Profile Picture" class="profile-pic-large">
+                            <h2 id="teacherNameProfile">Teacher Name</h2>
+                            <p id="teacherRegNo">Reg No: T1001</p>
+                            <p id="teacherEmail">Email: Not provided</p>
+                            <p id="teacherDepartment">Department: Not specified</p>
+                            <button id="editProfileBtn" class="edit-profile-btn">Edit Profile</button>
+                        </div>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <h4>Papers Published</h4>
+                                <p id="papersPublished">15</p>
+                            </div>
+                            <div class="stat">
+                                <h4>Rating</h4>
+                                <p id="rating">4.8 <span class="stars">★★★★★</span></p>
+                            </div>
+                            <div class="stat">
+                                <h4>Experience</h4>
+                                <p id="experience">10 Years</p>
+                            </div>
+                        </div>
+                        <div class="profile-graph">
+                            <h4>Performance Over Time</h4>
+                            <canvas id="performanceGraph"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add/Update Student Details -->
+                <div class="section student-details-section">
+                    <h3>Add/Update Student Details</h3>
+                    <form id="studentForm">
+                        <label for="studentRegNo">Student Reg No:</label>
+                        <input type="text" id="studentRegNo" placeholder="Student Reg No" required>
+                        <label for="studentName">Student Name:</label>
+                        <input type="text" id="studentName" placeholder="Student Name" required>
+                        <label for="studentMarks">Marks:</label>
+                        <input type="number" id="studentMarks" placeholder="Marks" required>
+                        <label for="studentAttendance">Attendance (%):</label>
+                        <input type="number" id="studentAttendance" placeholder="Attendance (%)" required>
+                        <label for="studentPapers">Research Papers (comma-separated):</label>
+                        <textarea id="studentPapers" placeholder="Research Papers (comma-separated)"></textarea>
+                        <button type="submit">Save Details</button>
+                    </form>
+                </div>
+
+                <!-- View Student Details -->
+                <div class="section student-search-section">
+                    <h3>View Student Details</h3>
+                    <form id="searchForm">
+                        <label for="searchRegNo">Enter Reg No:</label>
+                        <input type="text" id="searchRegNo" placeholder="Enter Reg No" required>
+                        <button type="submit">Fetch Details</button>
+                    </form>
+                    <div id="studentDetails" class="student-details"></div>
+                </div>
+
+                <!-- Courses Assigned -->
+                <div class="section courses-section">
+                    <h3>Courses Assigned</h3>
+                    <div id="coursesList" class="courses-list">
+                        <!-- Courses will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="section activity-section">
+                    <h3>Recent Activity</h3>
+                    <ul id="recentActivity" class="activity-list">
+                        <!-- Activities will be dynamically added here -->
+                    </ul>
+                </div>
+
+                <button id="logout" class="logout-btn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Settings</h2>
+            <div class="theme-options">
+                <h3>Change Theme</h3>
+                <button id="lightThemeBtn">Light Theme</button>
+                <button id="darkThemeBtn">Dark Theme</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Edit Profile</h2>
+            <form id="editProfileForm" enctype="multipart/form-data">
+                <label for="editProfilePic">Profile Picture (JPEG/PNG):</label>
+                <input type="file" id="editProfilePic" name="profilePic" accept="image/jpeg,image/png">
+                <label for="editName">Name:</label>
+                <input type="text" id="editName" name="name" required>
+                <label for="editEmail">Email:</label>
+                <input type="email" id="editEmail" name="email">
+                <label for="editDepartment">Department:</label>
+                <input type="text" id="editDepartment" name="department">
+                <button type="submit">Update Profile</button>
+                <p id="profileUpdateStatus" class="upload-status"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem("authToken");
+            const userData = JSON.parse(localStorage.getItem("user"));
+
+            if (!token || !userData || userData.role !== "teacher") {
+                alert("Access Denied!");
+                window.location.href = "index.html";
+                return;
+            }
+
+            // Populate teacher profile
+            document.getElementById("teacherName").textContent = userData.name;
+            document.getElementById("teacherNameHeader").textContent = userData.name.split(" ")[0];
+            document.getElementById("teacherNameProfile").textContent = userData.name;
+            document.getElementById("teacherRegNo").textContent = `Reg No: ${userData.regNo}`;
+            document.getElementById("teacherEmail").textContent = `Email: ${userData.email || "Not provided"}`;
+            document.getElementById("teacherDepartment").textContent = `Department: ${userData.department || "Not specified"}`;
+            if (userData.profilePic) {
+                document.getElementById("profilePic").src = `http://localhost:5000/download/${userData.profilePic}`;
+                document.getElementById("profilePicLarge").src = `http://localhost:5000/download/${userData.profilePic}`;
+            }
+            // Mock data for profile stats (replace with actual data from backend)
+            document.getElementById("papersPublished").textContent = "15";
+            document.getElementById("rating").innerHTML = "4.8 <span class='stars'>★★★★★</span>";
+            document.getElementById("experience").textContent = "10 Years";
+
+            // Performance Graph
+            const ctx = document.getElementById("performanceGraph").getContext("2d");
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                    datasets: [{
+                        label: "Performance Score",
+                        data: [65, 70, 80, 85, 90, 95],
+                        borderColor: "#5A3CFF",
+                        backgroundColor: "rgba(90, 60, 255, 0.2)",
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Mock data for courses assigned (replace with actual data from backend)
+            const coursesList = document.getElementById("coursesList");
+            const mockCourses = [
+                { name: "Advanced Machine Learning", code: "CS501", students: 30 },
+                { name: "Data Structures", code: "CS301", students: 45 },
+                { name: "Algorithms", code: "CS401", students: 25 }
+            ];
+            mockCourses.forEach(course => {
+                const courseCard = document.createElement("div");
+                courseCard.className = "course-card";
+                courseCard.innerHTML = `
+                    <h4>${course.name}</h4>
+                    <p><b>Code:</b> ${course.code}</p>
+                    <p><b>Students Enrolled:</b> ${course.students}</p>
+                `;
+                coursesList.appendChild(courseCard);
+            });
+
+            // Mock data for recent activity (replace with actual data from backend)
+            const recentActivity = document.getElementById("recentActivity");
+            const mockActivities = [
+                "Reviewed research paper from S1001",
+                "Updated marks for S1002",
+                "Assigned new course CS601",
+                "Commented on S1003's paper"
+            ];
+            mockActivities.forEach(activity => {
+                const li = document.createElement("li");
+                li.textContent = activity;
+                recentActivity.appendChild(li);
+            });
+
+            // Edit Profile Modal
+            const editProfileModal = document.getElementById("editProfileModal");
+            const editProfileBtn = document.getElementById("editProfileBtn");
+            const closeEditProfileBtn = editProfileModal.querySelector(".close");
+
+            editProfileBtn.addEventListener("click", () => {
+                // Pre-fill the form with current data
+                document.getElementById("editName").value = userData.name;
+                document.getElementById("editEmail").value = userData.email || "";
+                document.getElementById("editDepartment").value = userData.department || "";
+                editProfileModal.style.display = "flex";
+                editProfileModal.classList.add("modal-open");
+            });
+
+            closeEditProfileBtn.addEventListener("click", () => {
+                editProfileModal.classList.remove("modal-open");
+                setTimeout(() => {
+                    editProfileModal.style.display = "none";
+                }, 300);
+            });
+
+            window.addEventListener("click", (event) => {
+                if (event.target == editProfileModal) {
+                    editProfileModal.classList.remove("modal-open");
+                    setTimeout(() => {
+                        editProfileModal.style.display = "none";
+                    }, 300);
+                }
+            });
+
+            // Handle Profile Update
+            const editProfileForm = document.getElementById("editProfileForm");
+            const profileUpdateStatus = document.getElementById("profileUpdateStatus");
+
+            editProfileForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const name = document.getElementById("editName").value.trim();
+                const email = document.getElementById("editEmail").value.trim();
+                const department = document.getElementById("editDepartment").value.trim();
+                const profilePic = document.getElementById("editProfilePic").files[0];
+
+                if (!name) {
+                    profileUpdateStatus.textContent = "Name is required.";
+                    profileUpdateStatus.style.color = "#FF4D4D";
+                    profileUpdateStatus.classList.add("shake");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("regNo", userData.regNo);
+                formData.append("name", name);
+                if (email) formData.append("email", email);
+                if (department) formData.append("department", department);
+                if (profilePic) formData.append("profilePic", profilePic);
+
+                try {
+                    const res = await fetch("http://localhost:5000/teacher/updateProfile", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        throw new Error(`Server responded with an error: ${res.status} ${res.statusText} - ${errorText}`);
+                    }
+
+                    const data = await res.json();
+                    if (!data.success) {
+                        throw new Error(data.message || "Profile update failed.");
+                    }
+
+                    // Update local storage and UI
+                    const updatedUserData = { ...userData, name, email, department };
+                    if (data.profilePic) {
+                        updatedUserData.profilePic = data.profilePic;
+                    }
+                    localStorage.setItem("user", JSON.stringify(updatedUserData));
+
+                    profileUpdateStatus.textContent = "Profile updated successfully!";
+                    profileUpdateStatus.style.color = "#28A745";
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } catch (err) {
+                    console.error("Update Profile Error:", err);
+                    profileUpdateStatus.textContent = `Update failed: ${err.message}`;
+                    profileUpdateStatus.style.color = "#FF4D4D";
+                    profileUpdateStatus.classList.add("shake");
+                }
+            });
+
+            // Add/Update Student Details
+            document.getElementById("studentForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const regNo = document.getElementById("studentRegNo").value.trim();
+                const name = document.getElementById("studentName").value.trim();
+                const marks = document.getElementById("studentMarks").value.trim();
+                const attendance = document.getElementById("studentAttendance").value.trim();
+                const researchPapers = document.getElementById("studentPapers").value.trim().split(",").filter(p => p.trim());
+
+                if (!regNo || !name || !marks || !attendance) {
+                    alert("All fields are required!");
+                    return;
+                }
+
+                try {
+                    const res = await fetch("http://localhost:5000/teacher/addStudentDetails", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                        body: JSON.stringify({ regNo, name, marks, attendance, researchPapers })
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || "Failed to save student details");
+                    alert("Student details saved successfully!");
+                    document.getElementById("studentForm").reset();
+                } catch (error) {
+                    console.error("Add/Update Student Error:", error);
+                    alert("Error: " + error.message);
+                }
+            });
+
+            // Search Student Details (Updated to use new endpoint)
+            document.getElementById("searchForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const regNo = document.getElementById("searchRegNo").value.trim();
+                if (!regNo) {
+                    alert("Enter a Registration Number!");
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`http://localhost:5000/teacher/student/${regNo}`, {
+                        method: "GET",
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || "Failed to fetch student details");
+
+                    const student = data.student;
+                    let papersHtml = "<h4>Research Papers:</h4>";
+                    if (student.researchPapers && student.researchPapers.length > 0) {
+                        student.researchPapers.forEach(paper => {
+                            const downloadLink = paper.fileId ? `<a href="http://localhost:5000/download/${paper.filename}" target="_blank">${paper.filename}</a>` : paper.filename;
+                            papersHtml += `
+                                <div class="research-paper">
+                                    <p><b>Paper:</b> ${downloadLink}</p>
+                                    <p><b>Uploaded At:</b> ${new Date(paper.uploadedAt).toLocaleDateString()}</p>
+                                    <p><b>Status:</b> ${paper.status}</p>
+                                    <p><b>Teacher Comment:</b> ${paper.teacherComment || "None"}</p>
+                                    <button onclick="acceptPaper('${student.regNo}', '${paper.filename}')">Accept</button>
+                                    <button onclick="requestModification('${student.regNo}', '${paper.filename}')">Request Modification</button>
+                                    <div id="commentBox-${paper.filename}" style="display: none;">
+                                        <textarea id="comment-${paper.filename}" placeholder="Enter comments for modification"></textarea>
+                                        <button onclick="submitComment('${student.regNo}', '${paper.filename}')">Submit Comment</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        papersHtml += "<p>No research papers submitted.</p>";
+                    }
+
+                    document.getElementById("studentDetails").innerHTML = `
+                        <p><b>Name:</b> ${student.name}</p>
+                        <p><b>Reg No:</b> ${student.regNo}</p>
+                        <p><b>Marks:</b> ${student.marks}</p>
+                        <p><b>Attendance:</b> ${student.attendance}%</p>
+                        ${papersHtml}
+                        <div class="modify-form">
+                            <h4>Modify Student Details</h4>
+                            <form id="modifyForm-${student.regNo}">
+                                <label for="modifyName">Name:</label>
+                                <input type="text" id="modifyName" value="${student.name}" required>
+                                <label for="modifyMarks">Marks:</label>
+                                <input type="number" id="modifyMarks" value="${student.marks}" required>
+                                <label for="modifyAttendance">Attendance (%):</label>
+                                <input type="number" id="modifyAttendance" value="${student.attendance}" required>
+                                <button type="submit">Update Details</button>
+                            </form>
+                        </div>
+                    `;
+
+                    // Add event listener for the modify form
+                    document.getElementById(`modifyForm-${student.regNo}`).addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const name = document.getElementById("modifyName").value.trim();
+                        const marks = document.getElementById("modifyMarks").value.trim();
+                        const attendance = document.getElementById("modifyAttendance").value.trim();
+
+                        if (!name || !marks || !attendance) {
+                            alert("All fields are required!");
+                            return;
+                        }
+
+                        try {
+                            const res = await fetch("http://localhost:5000/teacher/addStudentDetails", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                                body: JSON.stringify({ regNo: student.regNo, name, marks, attendance })
+                            });
+
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.message || "Failed to update student details");
+                            alert("Student details updated successfully!");
+                            document.getElementById("searchForm").dispatchEvent(new Event("submit"));
+                        } catch (error) {
+                            console.error("Modify Student Error:", error);
+                            alert("Error: " + error.message);
+                        }
+                    });
+                } catch (error) {
+                    console.error("Fetch Student Error:", error);
+                    alert("Error: " + error.message);
+                }
+            });
+
+            // Accept Research Paper
+            window.acceptPaper = async (regNo, filename) => {
+                try {
+                    const res = await fetch("http://localhost:5000/teacher/updateResearchPaperStatus", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                        body: JSON.stringify({ regNo, filename, status: "Accepted", teacherComment: "" })
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || "Failed to accept research paper");
+                    alert("Research paper accepted!");
+                    document.getElementById("searchForm").dispatchEvent(new Event("submit"));
+                } catch (error) {
+                    console.error("Accept Paper Error:", error);
+                    alert("Error: " + error.message);
+                }
+            };
+
+            // Request Modification for Research Paper
+            window.requestModification = (regNo, filename) => {
+                const commentBox = document.getElementById(`commentBox-${filename}`);
+                commentBox.style.display = "block";
+            };
+
+            // Submit Comment for Modification
+            window.submitComment = async (regNo, filename) => {
+                const comment = document.getElementById(`comment-${filename}`).value.trim();
+                if (!comment) {
+                    alert("Please enter a comment for modification!");
+                    return;
+                }
+
+                try {
+                    const res = await fetch("http://localhost:5000/teacher/updateResearchPaperStatus", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                        body: JSON.stringify({ regNo, filename, status: "Needs Modification", teacherComment: comment })
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || "Failed to request modification");
+                    alert("Modification request submitted!");
+                    document.getElementById("searchForm").dispatchEvent(new Event("submit"));
+                } catch (error) {
+                    console.error("Submit Comment Error:", error);
+                    alert("Error: " + error.message);
+                }
+            };
+
+            // Logout
+            document.getElementById("logout").addEventListener("click", () => {
+                localStorage.removeItem("user");
+                localStorage.removeItem("authToken");
+                window.location.href = "index.html";
+            });
+
+            // Settings Modal
+            const settingsModal = document.getElementById("settingsModal");
+            const settingsBtn = document.getElementById("settingsBtn");
+            const closeSettingsBtn = settingsModal.querySelector(".close");
+
+            settingsBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                settingsModal.style.display = "flex";
+                settingsModal.classList.add("modal-open");
+            });
+
+            closeSettingsBtn.addEventListener("click", () => {
+                settingsModal.classList.remove("modal-open");
+                setTimeout(() => {
+                    settingsModal.style.display = "none";
+                }, 300);
+            });
+
+            window.addEventListener("click", (event) => {
+                if (event.target == settingsModal) {
+                    settingsModal.classList.remove("modal-open");
+                    setTimeout(() => {
+                        settingsModal.style.display = "none";
+                    }, 300);
+                }
+            });
+
+            // Theme Switching
+            document.getElementById("lightThemeBtn").addEventListener("click", () => {
+                document.body.classList.remove("dark-theme");
+                document.body.classList.add("light-theme");
+                settingsModal.classList.remove("modal-open");
+                setTimeout(() => {
+                    settingsModal.style.display = "none";
+                }, 300);
+            });
+
+            document.getElementById("darkThemeBtn").addEventListener("click", () => {
+                document.body.classList.remove("light-theme");
+                document.body.classList.add("dark-theme");
+                settingsModal.classList.remove("modal-open");
+                setTimeout(() => {
+                    settingsModal.style.display = "none";
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

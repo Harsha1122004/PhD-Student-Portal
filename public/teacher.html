@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dashboard">
+        <h2>Welcome, Teacher</h2>
+        <button id="logout">Logout</button>
+
+        <h3>Upload Marks</h3>
+        <form id="uploadMarks">
+            <input type="text" id="studentId" placeholder="Student ID" required>
+            <input type="number" id="marks" placeholder="Marks" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <h3>Upload Attendance</h3>
+        <form id="uploadAttendance">
+            <input type="text" id="attStudentId" placeholder="Student ID" required>
+            <input type="number" id="attendance" placeholder="Attendance %" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <h3>View Research Papers</h3>
+        <ul id="researchPapers"></ul>
+    </div>
+
+    <script src="teacher.js"></script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="student.cs">
+</head>
+<body class="light-theme">
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Courses</a></li>
+                    <li><a href="#">Finance</a></li>
+                    <li><a href="#" id="settingsBtn">Settings</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <h1>Welcome back, <span id="studentNameHeader">John</span></h1>
+                <div class="user-profile">
+                    <img id="profilePic" src="default-profile-pic.png" alt="Profile Picture">
+                    <span id="studentName">John Doe</span>
+                </div>
+            </header>
+
+            <div class="dashboard-container">
+                <div class="stats-cards">
+                    <div class="card">
+                        <h3>Finance</h3>
+                        <p id="finance">$5,000</p>
+                    </div>
+                    <div class="card">
+                        <h3>Paper Submitted</h3>
+                        <p id="paperSubmitted">5</p>
+                    </div>
+                    <div class="card">
+                        <h3>Pending Papers</h3>
+                        <p id="pendingPapers">2</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Student Information</h3>
+                    <p id="studentRegNo"></p>
+                    <p id="studentMarks"></p>
+                    <p id="studentAttendance"></p>
+                </div>
+
+                <div class="section">
+                    <h3>Research Papers</h3>
+                    <ul id="researchPapers"></ul>
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <label for="paperTitle">Title:</label>
+                        <input type="text" id="paperTitle" name="title" required>
+                        <label for="paperFile">Upload Document (PDF only):</label>
+                        <input type="file" id="paperFile" name="file" accept=".pdf" required>
+                        <button type="submit" class="small-btn" id="uploadBtn">Upload</button>
+                        <p id="uploadStatus" class="upload-status"></p>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h3>Instructor Contact</h3>
+                    <button id="instructorBtn" class="instructor-btn">View Instructors</button>
+                    <button id="chatBtn" class="chat-btn">Chat with Instructor</button>
+                </div>
+
+                <button id="logout">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Settings</h2>
+            <div class="theme-options">
+                <h3>Change Theme</h3>
+                <button id="lightThemeBtn">Light Theme</button>
+                <button id="darkThemeBtn">Dark Theme</button>
+            </div>
+            <div class="profile-options">
+                <h3>Update Profile Picture</h3>
+                <form id="profilePicForm" enctype="multipart/form-data">
+                    <label for="profilePicInput">Choose Profile Picture (JPEG/PNG):</label>
+                    <input type="file" id="profilePicInput" name="profilePic" accept="image/jpeg,image/png" required>
+                    <button type="submit" class="small-btn" id="uploadProfilePicBtn">Upload Picture</button>
+                    <p id="profilePicStatus" class="upload-status"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const userData = localStorage.getItem("user");
+            const token = localStorage.getItem("authToken");
+
+            if (!userData || !token) {
+                alert("User not logged in!");
+                window.location.href = "index.html";
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            const studentRegNo = user.regNo;
+
+            try {
+                // Fetch student data
+                const res = await fetch(`http://localhost:5000/student/${studentRegNo}`, {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Failed to fetch student data.");
+
+                const student = data.student;
+
+                document.getElementById("studentName").textContent = student.name;
+                document.getElementById("studentNameHeader").textContent = student.name.split(" ")[0];
+                document.getElementById("studentRegNo").textContent = `Reg No: ${student.regNo}`;
+                document.getElementById("studentMarks").textContent = `Marks: ${student.marks}`;
+                document.getElementById("studentAttendance").textContent = `Attendance: ${student.attendance}%`;
+
+                // Set profile picture if available
+                if (student.profilePic) {
+                    document.getElementById("profilePic").src = student.profilePic;
+                }
+
+                // Fetch research papers from the database
+                const papersList = document.getElementById("researchPapers");
+                papersList.innerHTML = "";
+                student.researchPapers.forEach(paper => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `<a href="${paper.url}" target="_blank">${paper.title} (Published: ${new Date(paper.date).toLocaleDateString()})</a>`;
+                    papersList.appendChild(li);
+                });
+
+                // Placeholder data for stats cards (replace with actual data if available)
+                document.getElementById("finance").textContent = "$5,000";
+                document.getElementById("paperSubmitted").textContent = student.researchPapers.length;
+                document.getElementById("pendingPapers").textContent = "2"; // Replace with actual logic
+
+                // Handle paper upload
+                const uploadForm = document.getElementById("uploadForm");
+                const uploadBtn = document.getElementById("uploadBtn");
+                const uploadStatus = document.getElementById("uploadStatus");
+
+                uploadForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const title = document.getElementById("paperTitle").value.trim();
+                    const file = document.getElementById("paperFile").files[0];
+
+                    if (!title) {
+                        uploadStatus.textContent = "Please enter a title.";
+                        uploadStatus.style.color = "#FF4D4D";
+                        return;
+                    }
+
+                    if (!file) {
+                        uploadStatus.textContent = "Please select a PDF file.";
+                        uploadStatus.style.color = "#FF4D4D";
+                        return;
+                    }
+
+                    if (file.type !== "application/pdf") {
+                        uploadStatus.textContent = "Only PDF files are allowed.";
+                        uploadStatus.style.color = "#FF4D4D";
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append("title", title);
+                    formData.append("file", file);
+                    formData.append("regNo", studentRegNo);
+
+                    try {
+                        uploadBtn.disabled = true;
+                        uploadBtn.textContent = "Uploading...";
+                        uploadStatus.textContent = "Uploading your paper...";
+                        uploadStatus.style.color = "#FFD700";
+
+                        const uploadRes = await fetch("http://localhost:5000/student/upload-paper", {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            },
+                            body: formData
+                        });
+
+                        const data = await uploadRes.json();
+                        if (!uploadRes.ok) {
+                            throw new Error(data.message || "Upload failed.");
+                        }
+
+                        uploadStatus.textContent = "Research paper uploaded successfully!";
+                        uploadStatus.style.color = "#28A745";
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } catch (err) {
+                        uploadStatus.textContent = `Upload failed: ${err.message}`;
+                        uploadStatus.style.color = "#FF4D4D";
+                    } finally {
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = "Upload";
+                    }
+                });
+
+                // Handle profile picture upload
+                const profilePicForm = document.getElementById("profilePicForm");
+                const profilePicBtn = document.getElementById("uploadProfilePicBtn");
+                const profilePicStatus = document.getElementById("profilePicStatus");
+
+                profilePicForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const file = document.getElementById("profilePicInput").files[0];
+
+                    if (!file) {
+                        profilePicStatus.textContent = "Please select an image file.";
+                        profilePicStatus.style.color = "#FF4D4D";
+                        return;
+                    }
+
+                    if (!["image/jpeg", "image/png"].includes(file.type)) {
+                        profilePicStatus.textContent = "Only JPEG or PNG files are allowed.";
+                        profilePicStatus.style.color = "#FF4D4D";
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append("profilePic", file);
+                    formData.append("regNo", studentRegNo);
+
+                    try {
+                        profilePicBtn.disabled = true;
+                        profilePicBtn.textContent = "Uploading...";
+                        profilePicStatus.textContent = "Uploading your profile picture...";
+                        profilePicStatus.style.color = "#FFD700";
+
+                        const uploadRes = await fetch("http://localhost:5000/student/upload-profile-pic", {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            },
+                            body: formData
+                        });
+
+                        const data = await uploadRes.json();
+                        if (!uploadRes.ok) {
+                            throw new Error(data.message || "Upload failed.");
+                        }
+
+                        profilePicStatus.textContent = "Profile picture uploaded successfully!";
+                        profilePicStatus.style.color = "#28A745";
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } catch (err) {
+                        profilePicStatus.textContent = `Upload failed: ${err.message}`;
+                        profilePicStatus.style.color = "#FF4D4D";
+                    } finally {
+                        profilePicBtn.disabled = false;
+                        profilePicBtn.textContent = "Upload Picture";
+                    }
+                });
+
+            } catch (err) {
+                console.error(err);
+                alert("Error loading student dashboard: " + err.message);
+            }
+
+            // Logout functionality
+            document.getElementById("logout").addEventListener("click", () => {
+                localStorage.clear();
+                window.location.href = "index.html";
+            });
+
+            // Settings Modal
+            const modal = document.getElementById("settingsModal");
+            const settingsBtn = document.getElementById("settingsBtn");
+            const closeBtn = document.getElementsByClassName("close")[0];
+
+            settingsBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                modal.style.display = "block";
+            });
+
+            closeBtn.addEventListener("click", () => {
+                modal.style.display = "none";
+            });
+
+            window.addEventListener("click", (event) => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            });
+
+            // Theme Switching
+            document.getElementById("lightThemeBtn").addEventListener("click", () => {
+                document.body.classList.remove("dark-theme");
+                document.body.classList.add("light-theme");
+                modal.style.display = "none";
+            });
+
+            document.getElementById("darkThemeBtn").addEventListener("click", () => {
+                document.body.classList.remove("light-theme");
+                document.body.classList.add("dark-theme");
+                modal.style.display = "none";
+            });
+
+            // Instructor Button (Placeholder)
+            document.getElementById("instructorBtn").addEventListener("click", () => {
+                alert("View Instructors functionality coming soon!");
+            });
+
+            // Chat Button (Placeholder)
+            document.getElementById("chatBtn").addEventListener("click", () => {
+                alert("Chat with Instructor functionality coming soon!");
+            });
+        });
+    </script>
+</body>
+</html>
