@@ -61,6 +61,7 @@ npm install
 
 # Start the development server
 npm run dev
+
 👥 Contribution
 This is an Inter Department Project (IDP) developed by our Batch-13 during our B.Tech, 3rd year 2nd semester.
 
@@ -77,3 +78,5 @@ Team Members:
 🪪 License
 This repository is free to use for educational purposes.
 Feel free to fork, reference, or enhance it to suit your academic needs.
+
+
