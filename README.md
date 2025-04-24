@@ -32,7 +32,7 @@ Responsive and clean UI with a modern interface
 🛠 Technologies Used
 This portal is developed using the following stack:
 
-Frontend: React, TypeScript, Vite, Tailwind CSS, shadcn-ui
+Frontend: HTML, CSS , JAVASCRIPT
 
 Backend: Node.js, Express.js
 
@@ -62,7 +62,7 @@ npm install
 # Start the development server
 npm run dev
 👥 Contribution
-This is an Inter Department Project (IDP) developed by our Batch-04 during our B.Tech, 3rd year 2nd semester.
+This is an Inter Department Project (IDP) developed by our Batch-13 during our B.Tech, 3rd year 2nd semester.
 
 Team Members:
 
