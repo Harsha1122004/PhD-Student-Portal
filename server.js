@@ -10,14 +10,21 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors(
+
+    {
+        origin : ["https://ph-d-student-portal.vercel.app"],
+        methods : ["POST","GET"],
+        credentials : true
+                  }
+));
 app.use(express.static(path.join(__dirname, "public")));
 
 let gfsBucket;
 
 const initializeMongoDB = async () => {
     try {
-        await mongoose.connect("mongodb://localhost:27017/phd-management", {
+        await mongoose.connect("mongodb+srv://user001:testuser01@phdportal.obipvlt.mongodb.net/?retryWrites=true&w=majority&appName=PhDPortal", {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
