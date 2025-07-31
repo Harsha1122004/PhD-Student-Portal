@@ -71,9 +71,7 @@ Team Members:
 
 221FA04414 - PARASA GANESH
 
-221FA04073 - CHAITANYA NANDINI
 
-221FA04477 - TARAKA RAM
 
 🪪 License
 This repository is free to use for educational purposes.
