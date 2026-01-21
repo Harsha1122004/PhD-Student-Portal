@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect("mongodb://localhost:27017/phd-portal", {
+        const conn = await mongoose.connect("mongodb+srv://phdportal:Harsha37017@cluster0.glcel9s.mongodb.net/phd?appName=Cluster0", {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
@@ -14,3 +14,4 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
+
